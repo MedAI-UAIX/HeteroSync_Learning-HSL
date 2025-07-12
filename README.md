@@ -1,28 +1,50 @@
-1. The core codes of each learning method are presented. To utilize these methods effectively, the core codes need to be implemented in a distributed manner.
+# HeteroSync Learning (HSL): Addressing Data Heterogeneity in Distributed Medical Imaging
 
-2. In each distributed node, the name of the node where the local data resides is listed first in the node_list. 
-For example, in an experiment with five nodes: 
-    for Node 1, its node_list is ['Node1', 'Node2', 'Node3', 'Node4', 'Node5']; 
-    for Node 2, its node_list is ['Node2', 'Node1', 'Node3', 'Node4', 'Node5']; 
-    for Node 5, its node_list is ['Node5', 'Node1', 'Node2', 'Node3', 'Node4']. 
-This approach ensures that node_list[0] in the code represents the node where the local data is located.
+Data heterogeneity presents a significant challenge in distributed artificial intelligence (AI) for medical imaging, limiting model performance across diverse clinical settings. To address this, we propose HeteroSync Learning (HSL), a privacy-preserving distributed learning framework that mitigates data heterogeneity by aligning heterogeneous representation through: (1) the Shared Anchor Task (SAT), a homogeneous reference task that establishes cross-node representation alignment; and (2) a customized Auxiliary Learning Architecture that coordinates the co-optimization of SAT with local primary tasks. HSL is validated through large-scale simulations, covering feature, label, quantity, and combined heterogeneity scenarios, and applied to a real-world multi-center thyroid cancer diagnosis project. The results show that HSL outperforms local learning, four classical methods (Personalized Learning, FedAvg, FedProx, SplitAVG), eight state-of-the-art algorithms (e.g., FedRCL, FedCOME, FedDpS), and large foundation model (e.g., CLIP) by up to 40% in AUC, performing comparably to central learning. In generalization tests, HSL achieves an AUC of 0.846 on the out-of-distribution Pediatric Thyroid Cancer dataset, significantly outperforming other methods (AUC range: 0.564-0.795). Visualization results show that HSL transforms heterogeneous data distributions into homogeneous representations, demonstrating the effectiveness of its alignment mechanism. This study offers an efficient solution to the heterogeneity issue in distributed medical AI, promoting equitable collaboration among resource-unequal institutions, and advancing the democratization of healthcare AI.
 
-3. We use a simple parameter averaging method to combine model weights from each node:
-    weight= ((weight_1+weight_2+⋯+weight_i))/i
+This project code is owned by the MedAI Collaborative Laboratory. The code example is designed as a directly executable demo, with the following specifications:
 
-# Code example
-dict0=torch.load(swarm_dir+'/_{}_dict_best.pkl'.format(node_list[0]))
-for name in dict0:
-    for node in node_list[1:]:
-        dict0[name]+=torch.load(swarm_dir+'/_{}_dict_best.pkl'.format(node))[name]
-    dict0[name]/=len(node_list)
+The code example includes: 
+- `Data` and `Results` folders
+- Code files: `Demo.py`, `MMOE_ResNet18.py`, and `SSL_train.py`
 
-4. For Personalized Learning, besides the current node's model weight contributing 50%, the weights from all other nodes collectively contribute another 50%, and the fusion of these weights across all nodes still follows the averaging method.
-    weight= (weight_1*0.5+(weight_2+⋯+weight_i)/(i-1)*0.5
+## Project Structure
 
-# Code example
-dict0=torch.load(swarm_dir+'/_{}_dict_best.pkl'.format(node_list[0]))
-for name in dict0:
-    dict0[name]/=0.5
-    for node in node_list[1:]:
-        dict0[name]+=torch.load(swarm_dir+'/_{}_dict_best.pkl'.format(node))[name]*0.5/(len(node_list)-1)
+1. **Code Overview**  
+   The example demonstrates a thyroid cancer diagnosis scenario with 3 nodes participating in distributed learning. This simplified example omits distributed communication and weight encryption/decryption code between nodes, focusing only on Node 1's training and testing process.
+
+2. **Data Folder**  
+   Contains sample datasets for training, validation, and testing:
+   - Training set label distribution: Malignant:Benign = 7:7
+   - Validation set: Malignant:Benign = 2:2  
+   - Test set: Malignant:Benign = 1:1  
+   *(Replace with your actual data)*
+
+3. **Results Folder**  
+   Stores model weights during training and validation/test results.  
+   This folder also serves as the communication directory for distributed learning, where nodes download/upload model weights.  
+   The example assumes weights from 2 other nodes have already been downloaded:
+   - `Node1_dict_best.pkl`: Best weights from Node 1 during training
+   - `Node2_dict_best.pkl`: Downloaded best weights from Node 2  
+   - `Node3_dict_best.pkl`: Downloaded best weights from Node 3  
+   - `final_dict_best.pkl`: Final global model after training
+
+4. **Demo.py**  
+   Simplified training-validation-testing code for Node 1:
+   - `os.chdir('xx')`: Sets target directory (folder containing all example files)
+   - `data_path='./Data'`, `save_dir='./Results'`: Paths to Data/Results folders
+   - `dataset1_path=data_path+'/train'`: Main task dataset path  
+   - `dataset2_path=data_path+'/Data/RSNA_LUNG/train'`: SAT dataset path  
+   - `dataset_path=data_path+'/val'`: Validation dataset path during training  
+   - `dataset_path=data_path+'/test'`: Final test dataset path  
+
+5. **SSL_train.py**  
+   Contains intermediate training/testing code called by Demo.py, including a balanced data sampling mechanism for datasets with significant label distribution differences.
+
+6. **MMOE_ResNet18.py**  
+   Core HSL model code combining MMOE with ResNet, incorporating a temperature parameter "T" (based on knowledge distillation principles).
+
+7. **Training Notes**  
+   Adjust `batch_size` and `num_workers` according to your GPU/CPU configuration.
+
+For questions or suggestions, please contact us.
