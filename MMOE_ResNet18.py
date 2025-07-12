@@ -66,9 +66,6 @@ class Tower(nn.Module):
         out = torch.sigmoid(out)
         return out
 
-
-
-# MMoE模型
 class MMoE(nn.Module):
     def __init__(self, num_experts=12, num_feature=512, experts_out=32, experts_hidden=62, towers_hidden=16, tasks=3,T=3):
         super(MMoE, self).__init__()
