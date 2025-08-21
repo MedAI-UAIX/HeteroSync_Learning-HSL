@@ -1,9 +1,8 @@
-"""
-参考：
-https://blog.csdn.net/sgyuanshi/article/details/120939816
-https://github.com/tomtang110/Multitask/blob/master/Models/mmoe1.py
-https://github.com/easezyc/Multitask-Recommendation-Library
-"""
+# Portions of this file are adapted from:
+# https://github.com/easezyc/Multitask-Recommendation-Library
+# Licensed under the MIT License
+# Modifications made by MedAI-UAIX, 2025.
+
 
 import torch
 import torch.nn as nn
